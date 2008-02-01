@@ -7,9 +7,7 @@ DebugPbind : Pbind {
 		var endval = streampairs.size - 1;
 
 		streampairs.pairsDo({ |key, pat, i|
-//			pat.respondsTo(\trace).if({
-				streampairs[i+1] = pat /*.trace(prefix: key.asString ++ ": ")*/ .asStream;
-//			});
+			streampairs[i+1] = pat /*.trace(prefix: key.asString ++ ": ")*/ .asStream;
 		});
 
 		loop {

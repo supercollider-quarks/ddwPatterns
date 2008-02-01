@@ -35,7 +35,6 @@ PnNilSafe : Pn {
 		repeats.value.do {
 			saveLogicalTime = thisThread.clock.beats;
 			event = pattern.embedInStream(event);
-// [thisThread.clock.beats, saveLogicalTime].debug;
 			if(thisThread.clock.beats == saveLogicalTime) { ^event }
 		};
 		^event;

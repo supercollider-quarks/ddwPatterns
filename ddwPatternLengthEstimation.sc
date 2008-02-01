@@ -132,7 +132,6 @@
 
 // support for other objects
 + Object {
-//	estimateLength { ^min(this.size, 1) }	// maybe? not sure
 	estimateLength { ^1 }
 }
 
