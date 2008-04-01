@@ -186,7 +186,7 @@ Pwhile1 : Pwhile {
 	embedInStream { |event|
 		var	stream = pattern.asStream, next;
 		while { (next = stream.next(event)).notNil } {
-			if(func.value(next)) { event = next.yield } { ^event }
+			if(func.value(event, next)) { event = next.yield } { ^event }
 		}
 		^event
 	}
