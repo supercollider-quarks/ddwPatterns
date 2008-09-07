@@ -12,19 +12,6 @@
 }
 
 
-+ Pwhite {
-	embedInStream { arg inval;
-		var	loStream = lo.asStream,
-			hiStream = hi.asStream;
-		length.do({
-			inval = rrand(loStream.next(inval) ?? { ^inval },
-				hiStream.next(inval) ?? { ^inval })
-				.yield;
-		});
-		^inval;
-	}
-}
-
 + Pseries {
 	*fromEndpoints { |start, end, length = 2|
 		(length >= 2 and: { length != inf }).if({
