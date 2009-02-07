@@ -30,7 +30,9 @@ Paccum : Pattern {
 	storeArgs { ^[lo,hi,step,length,start, operator] }
 	embedInStream { arg inval;
 			// .value allows you to use a function or a stream as the starting value
-		var	cur = start.value(inval) ?? { lo rrand: hi },
+		var	streamlo = lo.value,
+			streamhi = hi.value,
+			cur = start.value(inval) ?? { streamlo rrand: streamhi },
 			stepStream = step.asStream,
 			opStream = operator.asStream,
 			nextStep;
@@ -39,7 +41,7 @@ Paccum : Pattern {
 			(nextStep = stepStream.next(inval)).isNil.if({
 				^inval
 			}, {
-				cur = (cur.perform(opStream.next(inval), nextStep)).fold(lo,hi);
+				cur = (cur.perform(opStream.next(inval), nextStep)).fold(streamlo, streamhi);
 			});
 		});
 		^inval;
@@ -52,7 +54,9 @@ Paccumbounce : Paccum {
 	}
 	storeArgs { ^[lo,hi,step,length,start] }
 	embedInStream { arg inval;
-		var	cur = start ?? { lo rrand: hi },
+		var	streamlo = lo.value,
+			streamhi = hi.value,
+			cur = start ?? { streamlo rrand: streamhi },
 			stepStream = step.asStream,
 			direction = 1, nextStep;
 		length.do({
@@ -61,8 +65,8 @@ Paccumbounce : Paccum {
 				^inval
 			}, {
 				cur = cur + (nextStep * direction);
-				(cur < lo or: { cur > hi }).if({
-					cur = cur.fold(lo,hi);
+				(cur < streamlo or: { cur > streamhi }).if({
+					cur = cur.fold(streamlo, streamhi);
 					direction = direction.neg;
 				});
 			});
@@ -73,7 +77,9 @@ Paccumbounce : Paccum {
 
 Pvbrown : Paccumbounce {
 	embedInStream { arg inval;
-		var	cur = start ?? { lo rrand: hi },
+		var	streamlo = lo.value,
+			streamhi = hi.value,
+			cur = start ?? { streamlo rrand: streamhi },
 			stepStream = step.asStream,
 			nextStep;
 		length.do({
@@ -81,11 +87,9 @@ Pvbrown : Paccumbounce {
 			(nextStep = stepStream.next(inval)).isNil.if({
 				^inval
 			}, {
-				cur = (cur + (nextStep * #[-1, 1].choose)).fold(lo,hi);
+				cur = (cur + (nextStep * #[-1, 1].choose)).fold(streamlo, streamhi);
 			});
 		});
 		^inval;
 	}
 }
-
-
