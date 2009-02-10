@@ -7,7 +7,8 @@
 	}
 	
 	oneValuePerBeat { |minDelta = 0|
-		^Penvir((delta: Pdiff(Ptime(inf)).asStream), StreamClutch(this, { ~delta.next > minDelta }), false)
+		^Penvir((delta: Pdiff(Ptime(inf)).asStream),
+			Pclutch(this, Pfunc { ~delta.next > minDelta }), true)
 	}
 }
 
