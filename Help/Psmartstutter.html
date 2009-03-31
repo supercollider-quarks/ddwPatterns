@@ -5,18 +5,18 @@
 <meta http-equiv="Content-Style-Type" content="text/css">
 <title></title>
 <meta name="Generator" content="Cocoa HTML Writer">
-<meta name="CocoaVersion" content="824.44">
+<meta name="CocoaVersion" content="824.48">
 <style type="text/css">
 p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica}
 p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
 p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
 p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco}
-p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #001ab2}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #001fb6}
 p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
-span.s1 {color: #0000ff}
-span.s2 {color: #001ab2}
+span.s1 {color: #0016ff}
+span.s2 {color: #001fb6}
 span.s3 {color: #000000}
-span.s4 {color: #36701f}
+span.s4 {color: #366f1a}
 span.Apple-tab-span {white-space:pre}
 </style>
 </head>
@@ -51,7 +51,7 @@ span.Apple-tab-span {white-space:pre}
 <p class="p5">SynthDef<span class="s3">(</span><span class="s4">\sinGrain</span><span class="s3">, { </span>|outbus = 0, freq, amp, dur, pan|</p>
 <p class="p4"><span class="Apple-tab-span">	</span><span class="s2">var</span><span class="Apple-tab-span">	</span>sig = <span class="s2">Pan2</span>.ar(<span class="s2">SinOsc</span>.ar(freq, 0, amp) * <span class="s2">EnvGen</span>.kr(<span class="s2">Env</span>.sine(dur), doneAction:2), pan);</p>
 <p class="p4"><span class="Apple-tab-span">	</span><span class="s2">Out</span>.ar(outbus, sig);</p>
-<p class="p4">}).store;</p>
+<p class="p4">}).memStore;</p>
 <p class="p6"><br></p>
 <p class="p4">p = <span class="s2">Pbind</span>(</p>
 <p class="p4"><span class="Apple-tab-span">	</span><span class="s4">\freq</span>, <span class="s2">Pwhite</span>(0.0, 1.0, <span class="s2">inf</span>).linexp(0.0, 1.0, 300.0, 2400.0),</p>
