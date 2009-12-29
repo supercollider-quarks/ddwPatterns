@@ -76,17 +76,18 @@ Pdelta : FilterPattern {
 		var	stream = pattern.asStream,
 			lastValue, value;
 		(lastValue = stream.next(inval)).isNil.if({ ^inval });
-		inf.do({
-			(value = stream.next(inval)).isNil.if({ ^inval });
-			{ value >= lastValue }.while({
+		loop {
+			while {
+				(value = stream.next(inval)).isNil.if({ ^inval });
+				value >= lastValue
+			} {
 				inval = (value - lastValue).yield;	// these must be numbers obviously
 				lastValue = value;
-				(value = stream.next(inval)).isNil.if({ ^inval });
-			});
+			};
 			lastValue = lastValue - (lastValue - value).roundUp(cycle);
 			inval = (value - lastValue).yield;
 			lastValue = value;
-		});
+		};
 		^inval
 	}
 }
