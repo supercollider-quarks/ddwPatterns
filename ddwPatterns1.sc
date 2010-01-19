@@ -56,7 +56,7 @@ Paccumbounce : Paccum {
 	embedInStream { arg inval;
 		var	streamlo = lo.value,
 			streamhi = hi.value,
-			cur = start ?? { streamlo rrand: streamhi },
+			cur = start.value(inval) ?? { streamlo rrand: streamhi },
 			stepStream = step.asStream,
 			direction = 1, nextStep;
 		length.do({
@@ -79,7 +79,7 @@ Pvbrown : Paccumbounce {
 	embedInStream { arg inval;
 		var	streamlo = lo.value,
 			streamhi = hi.value,
-			cur = start ?? { streamlo rrand: streamhi },
+			cur = start.value(inval) ?? { streamlo rrand: streamhi },
 			stepStream = step.asStream,
 			nextStep;
 		length.do({
