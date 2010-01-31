@@ -144,3 +144,7 @@ Pmcvoss : Pvoss {
 		^inval
 	}
 }
+
+Ptempo : Pattern {
+	asStream { ^FuncStream({ thisThread.clock.tryPerform(\tempo) ?? { 1 } }) }
+}

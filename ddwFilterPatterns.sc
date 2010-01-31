@@ -192,3 +192,34 @@ Pwhile1 : Pwhile {
 		^event
 	}
 }
+
+
+// delays a value by 'n' events
+// 'n' can be set by a func but can't change while the Pdelay runs
+// 'cuz I don't want to deal with interpolation in this version
+Pdelay : FilterPattern {
+	var	<>delay, <>maxDelay;
+	*new { |pattern, delay = 1, maxDelay = 1|
+		^super.new(pattern).delay_(delay).maxDelay_(maxDelay)
+	}
+	
+	embedInStream { |inval|
+		var	dly = delay.value(inval),
+			bsize = max(maxDelay, dly) + 1,
+			buffer = Array.newClear(bsize),
+			stream = pattern.asStream,
+			writeI = 0, readI = dly.neg,
+			item;
+		while { (item = stream.next(inval)).notNil } {
+			buffer.wrapPut(writeI, item);
+			inval = buffer.wrapAt(max(readI, 0)).yield;
+			writeI = writeI + 1;
+			readI = readI + 1;
+		};
+			// input stream ended but the last 'dly' items haven't been yielded yet
+		dly.do { |x|
+			inval = buffer.wrapAt(max(readI + x, 0)).yield;
+		};
+		^inval
+	}
+}
