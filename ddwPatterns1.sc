@@ -36,7 +36,7 @@ Paccum : Pattern {
 			stepStream = step.asStream,
 			opStream = operator.asStream,
 			nextStep;
-		length.do({
+		length.value(inval).do({
 			inval = cur.yield;
 			(nextStep = stepStream.next(inval)).isNil.if({
 				^inval
@@ -59,7 +59,7 @@ Paccumbounce : Paccum {
 			cur = start.value(inval) ?? { streamlo rrand: streamhi },
 			stepStream = step.asStream,
 			direction = 1, nextStep;
-		length.do({
+		length.value(inval).do({
 			inval = cur.yield;
 			(nextStep = stepStream.next(inval)).isNil.if({
 				^inval
@@ -82,7 +82,7 @@ Pvbrown : Paccumbounce {
 			cur = start.value(inval) ?? { streamlo rrand: streamhi },
 			stepStream = step.asStream,
 			nextStep;
-		length.do({
+		length.value(inval).do({
 			inval = cur.yield;
 			(nextStep = stepStream.next(inval)).isNil.if({
 				^inval

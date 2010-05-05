@@ -6,7 +6,7 @@ Pwxrand : Pwrand {
 		var item, 
 			index = weights.windex, 
 			totalweight, rnd, runningsum; 
-		repeats.value.do({ |i| 
+		repeats.value(inval).do({ |i| 
 			item = list.at(index); 
 			inval = item.embedInStream(inval); 
 
@@ -32,21 +32,21 @@ PslideNoWrap : Pslide {
 
 Pslide1 : Pslide {
     embedInStream { arg inval;
-	    	var pos, item, lenStream, stepStream, lenn, stepp;
-	    	pos = start;
-	    	lenStream = len.asStream;
-	    	stepStream = step.asStream;
-	    	repeats.do({
-	    			// nil protection -- stop immediately if lenStream or stepStream return nil
-	    		(lenn = lenStream.next(inval)).notNil.if({
-		    		lenn.do({ arg j;
-		    			item = list.wrapAt(pos + j);
-		    			inval = item.embedInStream(inval);
-		    		});
-		    		(stepp = stepStream.next(inval)).notNil.if({ pos = pos + stepp },
-		    			{ ^inval });
-		    	}, { ^inval });
-	    	});
+    	var pos, item, lenStream, stepStream, lenn, stepp;
+    	pos = start;
+    	lenStream = len.asStream;
+    	stepStream = step.asStream;
+    	repeats.value(inval).do({
+    			// nil protection -- stop immediately if lenStream or stepStream return nil
+    		(lenn = lenStream.next(inval)).notNil.if({
+	    		lenn.do({ arg j;
+	    			item = list.wrapAt(pos + j);
+	    			inval = item.embedInStream(inval);
+	    		});
+	    		(stepp = stepStream.next(inval)).notNil.if({ pos = pos + stepp },
+	    			{ ^inval });
+	    	}, { ^inval });
+    	});
 	     ^inval;  		
     }
 }
@@ -68,14 +68,14 @@ PseqFunc : Pseq {
 		var item, offsetValue;
 		offsetValue = offset.value;
 		if (inval.eventAt('reverse') == true, {
-			repeats.value.do({ arg j;
+			repeats.value(inval).do({ arg j;
 				list.size.reverseDo({ arg i;
 					item = func.value(list.wrapAt(i + offsetValue));
 					inval = item.embedInStream(inval);
 				});
 			});
 		},{
-			repeats.value.do({ arg j;
+			repeats.value(inval).do({ arg j;
 				list.size.do({ arg i;
 					item = func.value(list.wrapAt(i + offsetValue));
 					inval = item.embedInStream(inval);
@@ -91,12 +91,12 @@ PserFunc : PseqFunc {
 		var item, offsetValue;
 		offsetValue = offset.value;
 		if (inval.eventAt('reverse') == true, {
-			repeats.value.reverseDo({ arg i;
+			repeats.value(inval).reverseDo({ arg i;
 				item = func.value(list.wrapAt(i + offsetValue));
 				inval = item.embedInStream(inval);
 			});
 		},{
-			repeats.value.do({ arg i;
+			repeats.value(inval).do({ arg i;
 				item = func.value(list.wrapAt(i + offsetValue));
 				inval = item.embedInStream(inval);
 			});
@@ -131,7 +131,7 @@ Pmcvoss : Pvoss {
 			total = gens.sum,
 			i, new;
 		
-		length.value.do {
+		length.value(inval).do {
 			inval = ((total / localGenerators) * (hi - lo) + lo).yield;
 			
 			i = counter.trailingZeroes;
