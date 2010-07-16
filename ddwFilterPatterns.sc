@@ -184,12 +184,17 @@ Plimitsum : Pconst {
 // Pwhile embeds its pattern in the stream; Pwhile1 embeds stream values singly
 
 Pwhile1 : Pwhile {
-	embedInStream { |event|
+	asStream { |cleanup| ^Routine({ arg inval; this.embedInStream(inval, cleanup) }) }
+	embedInStream { |event, cleanup|
 		var	stream = pattern.asStream, next;
+		cleanup ?? { cleanup = EventStreamCleanup.new };
 		while { (next = stream.next(event)).notNil } {
-			if(func.value(event, next)) { event = next.yield } { ^event }
+			if(func.value(event, next)) {
+				cleanup.update(next);
+				event = next.yield;
+			} { ^cleanup.exit(event) }
 		}
-		^event
+		^cleanup.exit(event)
 	}
 }
 
