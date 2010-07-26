@@ -127,6 +127,10 @@
 	estimateLength { ^count }
 }
 
++ Pfuncn {
+	estimateLength { ^repeats }
+}
+
 // no good way to estimate # of events for Pfindur, Pstutter, a few others
 // maybe I'll look at them later
 
