@@ -23,6 +23,10 @@
 	estimateLength { ^length }
 }
 
++ Paccum {
+	estimateLength { ^length }
+}
+
 // list patterns generally have a repeat argument
 // we'll assume most of them return "repeats" events
 + ListPattern {
