@@ -28,14 +28,27 @@ Pembedn : Pn {
 // this should be used ONLY for event patterns that will be played on a clock
 // streams may terminate prematurely if you use this in other contexts
 // this is a workaround until I find a better solution
+// and, to make a workaround more workaround-y,
+// sometimes you want to allow a couple of zero-length embeds but not let it go infinitely
+// so add a maxNull counter
 
 PnNilSafe : Pn {
+	var	<>maxNull;
+	*new { |pattern, repeats = inf, maxNull = 0|
+		^super.new(pattern, repeats).maxNull_(maxNull)
+	}
 	embedInStream { arg event;
-		var	saveLogicalTime;
+		var	saveLogicalTime, counter = 0;
 		repeats.value.do {
 			saveLogicalTime = thisThread.clock.beats;
 			event = pattern.embedInStream(event);
-			if(thisThread.clock.beats == saveLogicalTime) { ^event }
+			if(thisThread.clock.beats == saveLogicalTime) {
+				counter = counter + 1;
+				if(counter > maxNull) { ^event };
+			} {
+				// one good embed resets the count
+				counter = 0;
+			};
 		};
 		^event;
 	}
@@ -162,14 +175,15 @@ Pscratch : FilterPattern {
 
 Plimitsum : Pconst {
 	embedInStream { arg inval;
-		var delta, elapsed = 0.0, nextElapsed, str=pattern.asStream;
+		var delta, elapsed = 0.0, nextElapsed, str=pattern.asStream,
+			localSum = sum.value(inval);
 		loop ({
 			delta = str.next(inval);
 			if(delta.isNil) { 
 				^inval
 			};
 			nextElapsed = elapsed + delta;
-			if (nextElapsed.round(tolerance) >= sum) {
+			if (nextElapsed.round(tolerance) >= localSum) {
 				^inval
 			}{
 				elapsed = nextElapsed;
