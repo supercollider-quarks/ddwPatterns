@@ -1,25 +1,30 @@
 
 	// some new patterns - jamshark70@dewdrop-world.net
 
-Pwxrand : Pwrand { 
-	embedInStream { |inval| 
-		var item, 
-			index = weights.windex, 
-			totalweight, rnd, runningsum; 
-		repeats.value(inval).do({ |i| 
-			item = list.at(index); 
-			inval = item.embedInStream(inval); 
+Pwxrand : Pwrand {
+	embedInStream { |inval|
+		var item,
+			weightStream = weights.asStream,
+			currentWeights,
+			index = weightStream.next(inval).windex,
+			totalweight, rnd, runningsum;
+		repeats.value(inval).do({ |i|
+			item = list.at(index);
+			inval = item.embedInStream(inval);
 
-			totalweight = 1.0 - weights[index]; 
-			rnd = totalweight.rand; 
-			runningsum = 0; 
-			while { 
-				index = (index + 1) % weights.size; 
-				runningsum = runningsum + weights[index]; 
-				runningsum < rnd 
-			}; 
-		}); 
-	} 
+			currentWeights = weightStream.next(inval);
+			if(currentWeights.isNil) { ^inval };
+
+			totalweight = 1.0 - currentWeights[index];
+			rnd = totalweight.rand;
+			runningsum = 0;
+			while {
+				index = (index + 1) % currentWeights.size;
+				runningsum = runningsum + currentWeights[index];
+				runningsum < rnd
+			};
+		});
+	}
 }
 
 // deprecated; Pslide now has a wrap flag
@@ -47,7 +52,7 @@ Pslide1 : Pslide {
 	    			{ ^inval });
 	    	}, { ^inval });
     	});
-	     ^inval;  		
+	     ^inval;
     }
 }
 
@@ -55,15 +60,15 @@ PseqFunc : Pseq {
 		// executes a function on the list item before embedding in stream
 		// if func is nil, the item is used as is
 	var	<func;
-	
+
 	*new { |list, repeats = 1, offset = 0, func|
 		^super.new(list, repeats, offset).func_(func)
 	}
-	
+
 	func_ { |f|
 		f.isNil.if({ func = { |x| x } }, { func = f });
 	}
-	
+
 	embedInStream {  arg inval;
 		var item, offsetValue;
 		offsetValue = offset.value;
@@ -122,7 +127,7 @@ Pvoss : Pattern {
 	}
 }
 
-Pmcvoss : Pvoss {	
+Pmcvoss : Pvoss {
 	embedInStream { |inval|
 		var	counter = 1,
 			localGenerators = generators.value,
@@ -130,15 +135,15 @@ Pmcvoss : Pvoss {
 			gens = { 1.0.rand } ! localGenerators,
 			total = gens.sum,
 			i, new;
-		
+
 		length.value(inval).do {
 			inval = ((total / localGenerators) * (hi - lo) + lo).yield;
-			
+
 			i = counter.trailingZeroes;
 			new = 1.0.rand;
 			total = total - gens[i] + new;
 			gens[i] = new;
-			
+
 			counter = (counter + 1).wrap(1, maxCounter);
 		};
 		^inval
