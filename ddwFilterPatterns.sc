@@ -148,8 +148,6 @@ Pscratch : FilterPattern {
 						// output the last value obtained
 					step.do({
 						(value = stream.next(inval)).isNil.if({
-								// always return last value!
-							inval = memory.wrapAt(bottomIndex-1).embedInStream(inval);
 							^inval
 						});
 						memory.wrapPut(bottomIndex, value);
