@@ -84,7 +84,7 @@ Pdelta : FilterPattern {
 	*new { |pattern, cycle = 4|
 		^super.newCopyArgs(pattern).cycle_(cycle)
 	}
-	
+
 	embedInStream { |inval|
 		var	stream = pattern.asStream,
 			lastValue, value;
@@ -106,6 +106,52 @@ Pdelta : FilterPattern {
 }
 
 
+// Sync time-points to the barline
+// Provide time-points as \timept
+// pattern must be an event pattern!
+PTimePoints : FilterPattern {
+	var <>tolerance;
+	*new { |pattern, tolerance = 0.001|
+		^super.new(pattern).tolerance_(tolerance);
+	}
+	embedInStream { |inval|
+		var // now = thisThread.beats,
+		beatInBar = thisThread.clock.beatInBar,
+		stream = pattern.asStream,
+		event = stream.next(inval.copy), oldEvent, timept;
+		if(event.isNil) { ^inval };
+		if(event[\timept].isNil) {
+			^inval
+		};
+		timept = event[\timept] % thisThread.clock.beatsPerBar;
+		if(timept absdif: beatInBar > tolerance) {
+			inval = Event.silent(
+				(timept - beatInBar).wrap(tolerance, thisThread.clock.beatsPerBar + tolerance),
+				inval
+			).yield;
+			beatInBar = timept;
+		};
+		while {
+			oldEvent = event;
+			event = stream.next(inval);
+			event.notNil and: { event[\timept].notNil }
+		} {
+			timept = event[\timept] % thisThread.clock.beatsPerBar;
+			oldEvent[\dur] = (timept - beatInBar).wrap(tolerance, thisThread.clock.beatsPerBar + tolerance);
+			inval = oldEvent.yield;
+			beatInBar = timept;
+		};
+		if(oldEvent.notNil) {
+			// resync to barline
+			// there is no 'event' here so we have no idea how long oldEvent should be
+			// without assuming a reference point. Barline is the most logical reference.
+			oldEvent[\dur] = (0 - beatInBar).wrap(tolerance, thisThread.clock.beatsPerBar + tolerance);
+			^oldEvent.yield
+		} { ^inval }
+	}
+}
+
+
 // record scratching goes forward and backward thru the audio stream
 // Pscratch does the same for the output values of a pattern
 // memory is finite (can only go backward so far)
@@ -116,7 +162,7 @@ Pscratch : FilterPattern {
 	*new { |pattern, stepPattern, memorySize = 100|
 		^super.newCopyArgs(pattern).stepPattern_(stepPattern).memorySize_(memorySize)
 	}
-	
+
 	embedInStream { |inval|
 		var	memSize = memorySize,	// protect against the instance variable changing
 			memory = Array.newClear(memSize),	// a circular buffer
@@ -126,7 +172,7 @@ Pscratch : FilterPattern {
 			stream = pattern.asStream,
 			stepStream = stepPattern.asStream,
 			value, step;
-		
+
 		while {
 			(step = stepStream.next(inval)).notNil
 		} {
@@ -177,7 +223,7 @@ Plimitsum : Pconst {
 			localSum = sum.value(inval);
 		loop ({
 			delta = str.next(inval);
-			if(delta.isNil) { 
+			if(delta.isNil) {
 				^inval
 			};
 			nextElapsed = elapsed + delta;
@@ -215,21 +261,21 @@ Pwhile1 : Pwhile {
 // 'n' can be set by a func but can't change while the Pdelay runs
 // 'cuz I don't want to deal with interpolation in this version
 Pdelay : FilterPattern {
-	var	<>delay, <>maxDelay;
-	*new { |pattern, delay = 1, maxDelay = 1|
-		^super.new(pattern).delay_(delay).maxDelay_(maxDelay)
+	var	<>delay, <>maxDelay, <>default;
+	*new { |pattern, delay = 1, maxDelay = 1, default|
+		^super.new(pattern).delay_(delay).maxDelay_(maxDelay).default_(default)
 	}
-	
+
 	embedInStream { |inval|
 		var	dly = delay.value(inval),
 			bsize = max(maxDelay, dly) + 1,
-			buffer = Array.newClear(bsize),
+			buffer = Array.fill(bsize, default),
 			stream = pattern.asStream,
 			writeI = 0, readI = dly.neg,
 			item;
 		while { (item = stream.next(inval)).notNil } {
 			buffer.wrapPut(writeI, item);
-			inval = buffer.wrapAt(max(readI, 0)).yield;
+			inval = (buffer.wrapAt(readI) ?? { buffer[0] }).yield;
 			writeI = writeI + 1;
 			readI = readI + 1;
 		};
