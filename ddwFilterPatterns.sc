@@ -145,7 +145,7 @@ PTimePoints : FilterPattern {
 			// resync to barline
 			// there is no 'event' here so we have no idea how long oldEvent should be
 			// without assuming a reference point. Barline is the most logical reference.
-			oldEvent[\dur] = (0 - beatInBar).wrap(tolerance, thisThread.clock.beatsPerBar + tolerance);
+			oldEvent[\dur] = (tolerance - beatInBar) % thisThread.clock.beatsPerBar - tolerance;
 			^oldEvent.yield
 		} { ^inval }
 	}
