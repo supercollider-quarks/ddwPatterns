@@ -27,6 +27,40 @@ Pwxrand : Pwrand {
 	}
 }
 
+Pwshuf : ListPattern {
+	var <>weights, <>mask;
+	*new { |list, weights, repeats, mask|
+		^super.new(list, repeats).weights_(weights).mask_(mask)
+	}
+	embedInStream { |inval|
+		var localWeights, i, maskOffset;
+		if(repeats == inf and: { weights.every(_ <= 0) }) {
+			"Pwshuf: No positive weights and infinite repeats, aborting.".warn;
+			^inval
+		};
+		repeats.do {
+			localWeights = weights.normalizeSum;  // returns a new array -- clever, no copy
+			while { localWeights.any(_ > 0) } {
+				i = localWeights.windex;
+				inval = list.wrapAt(i).embedInStream(inval);
+				if(mask.size == 0) {
+					localWeights = localWeights.wrapPut(i, localWeights.wrapAt(i) * (mask ? 0)).normalizeSum;
+				} {
+					maskOffset = mask.size div: 2;
+					mask.do { |factor, j|
+						j = j + i - maskOffset;
+						if(j >= 0 and: { j < localWeights.size }) {
+							localWeights.wrapPut(i, localWeights.wrapAt(i) * (factor ? 0));
+						};
+					};
+					localWeights = localWeights.normalizeSum;
+				};
+			};
+		};
+		^inval
+	}
+}
+
 // deprecated; Pslide now has a wrap flag
 PslideNoWrap : Pslide {
 		// false = do not wrap at end
